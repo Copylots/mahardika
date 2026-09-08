@@ -1,0 +1,6 @@
+{
+  "name": "Presensi Karyawan Mahardika",
+  "description": "Aplikasi Absensi Karyawan Berbasis Mobile yang dilengkapi dengan fitur GPS, pengenalan wajah, laporan bulanan, push notifikasi, dashboard admin, ekspor PDF/Excel, dark mode, dan sinkronisasi awan.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
