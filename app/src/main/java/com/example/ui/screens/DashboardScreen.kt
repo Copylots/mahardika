@@ -21,6 +21,9 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
 import com.example.data.AppNotification
 import com.example.data.AttendanceRecord
 import com.example.ui.AttendanceViewModel
@@ -38,6 +41,10 @@ fun DashboardScreen(
     val notifications by viewModel.allNotifications.collectAsState()
     val syncState by viewModel.syncState.collectAsState()
     val isAdminMode by viewModel.isAdminMode.collectAsState()
+
+    var showPinDialog by remember { mutableStateOf(false) }
+    var pinInput by remember { mutableStateOf("") }
+    var pinError by remember { mutableStateOf(false) }
 
     // Calculate personal stats
     val today = Calendar.getInstance()
@@ -105,10 +112,100 @@ fun DashboardScreen(
                     )
                     Switch(
                         checked = isAdminMode,
-                        onCheckedChange = { viewModel.setAdminMode(it) },
+                        onCheckedChange = { checked ->
+                            if (checked) {
+                                pinInput = ""
+                                pinError = false
+                                showPinDialog = true
+                            } else {
+                                viewModel.setAdminMode(false)
+                            }
+                        },
                         modifier = Modifier.testTag("admin_mode_switch")
                     )
                 }
+            }
+
+            if (showPinDialog) {
+                AlertDialog(
+                    onDismissRequest = { showPinDialog = false },
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Default.Lock,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    },
+                    title = {
+                        Text(
+                            text = "Verifikasi Administrator",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                    },
+                    text = {
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = "Masukkan PIN khusus Administrator untuk mengakses menu admin, laporan, dan data semua karyawan.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(bottom = 16.dp),
+                                textAlign = TextAlign.Center
+                            )
+                            OutlinedTextField(
+                                value = pinInput,
+                                onValueChange = {
+                                    pinInput = it
+                                    pinError = false
+                                },
+                                label = { Text("PIN Admin") },
+                                placeholder = { Text("Masukkan PIN") },
+                                visualTransformation = PasswordVisualTransformation(),
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                                singleLine = true,
+                                isError = pinError,
+                                supportingText = {
+                                    if (pinError) {
+                                        Text(
+                                            text = "PIN yang dimasukkan salah!",
+                                            color = MaterialTheme.colorScheme.error,
+                                            style = MaterialTheme.typography.bodySmall
+                                        )
+                                    }
+                                },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .testTag("admin_pin_input")
+                            )
+                        }
+                    },
+                    confirmButton = {
+                        Button(
+                            onClick = {
+                                if (pinInput == "admin234") {
+                                    viewModel.setAdminMode(true)
+                                    showPinDialog = false
+                                } else {
+                                    pinError = true
+                                }
+                            },
+                            modifier = Modifier.testTag("admin_pin_confirm_button")
+                        ) {
+                            Text("Verifikasi")
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(
+                            onClick = { showPinDialog = false },
+                            modifier = Modifier.testTag("admin_pin_dismiss_button")
+                        ) {
+                            Text("Batal")
+                        }
+                    }
+                )
             }
 
             // Sync Notification Status Bar
