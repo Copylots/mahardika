@@ -185,7 +185,7 @@ class AttendanceViewModel(application: Application) : AndroidViewModel(applicati
             
             // Trigger actual Local push notification
             showLocalPushNotification(
-                title = "Presensi Karyawan PT. MSS",
+                title = "Absensi Karyawan CV Mahardika",
                 message = "Berhasil ${if (type == "CHECK_IN") "Check-In" else "Check-Out"} ($workShift) di ${loc.address}!"
             )
             

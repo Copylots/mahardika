@@ -22,6 +22,6 @@ dependencyResolutionManagement {
   }
 }
 
-rootProject.name = "Presensi Karyawan PT. MSS"
+rootProject.name = "Absensi Karyawan CV Mahardika"
 
 include(":app")

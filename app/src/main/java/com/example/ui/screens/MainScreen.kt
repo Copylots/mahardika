@@ -60,7 +60,7 @@ fun MainScreen(
                         title = {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text(
-                                    text = "Presensi Karyawan PT. MSS",
+                                    text = "Absensi Karyawan CV Mahardika",
                                     fontWeight = FontWeight.Bold,
                                     style = MaterialTheme.typography.titleLarge
                                 )
