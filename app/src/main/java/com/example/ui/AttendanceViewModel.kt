@@ -19,6 +19,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import java.io.File
 import java.io.FileOutputStream
 import java.text.SimpleDateFormat
@@ -53,6 +55,9 @@ class AttendanceViewModel(application: Application) : AndroidViewModel(applicati
 
     private val _exportStatus = MutableStateFlow<String?>(null)
     val exportStatus = _exportStatus.asStateFlow()
+
+    private val _firebaseRecords = MutableStateFlow<List<AttendanceRecord>>(emptyList())
+    val firebaseRecords = _firebaseRecords.asStateFlow()
 
     init {
         val database = AttendanceDatabase.getDatabase(application)
@@ -186,6 +191,56 @@ class AttendanceViewModel(application: Application) : AndroidViewModel(applicati
             
             // Reset states for next actions
             _faceVerificationState.value = FaceState.Idle
+        }
+    }
+
+    fun fetchFirebaseRecords() {
+        viewModelScope.launch {
+            try {
+                val db = FirebaseFirestore.getInstance()
+                db.collection("attendance_records")
+                    .orderBy("timestamp", Query.Direction.DESCENDING)
+                    .get()
+                    .addOnSuccessListener { result ->
+                        val list = mutableListOf<AttendanceRecord>()
+                        for (document in result) {
+                            try {
+                                val empId = document.getString("employeeId") ?: ""
+                                val empName = document.getString("employeeName") ?: ""
+                                val timestamp = document.getLong("timestamp") ?: 0L
+                                val type = document.getString("type") ?: "CHECK_IN"
+                                val lat = document.getDouble("latitude") ?: 0.0
+                                val lon = document.getDouble("longitude") ?: 0.0
+                                val locName = document.getString("locationName") ?: ""
+                                val faceVerified = document.getBoolean("isFaceVerified") ?: false
+                                val confidence = document.getDouble("faceMatchConfidence")?.toFloat() ?: 0.0f
+                                val shift = document.getString("workShift") ?: "Shift 1"
+
+                                list.add(
+                                    AttendanceRecord(
+                                        id = document.id.hashCode(),
+                                        employeeId = empId,
+                                        employeeName = empName,
+                                        timestamp = timestamp,
+                                        type = type,
+                                        latitude = lat,
+                                        longitude = lon,
+                                        locationName = locName,
+                                        isFaceVerified = faceVerified,
+                                        faceMatchConfidence = confidence,
+                                        isSynced = true,
+                                        workShift = shift
+                                    )
+                                )
+                            } catch (ex: Exception) {
+                                // ignore parse errors
+                            }
+                        }
+                        _firebaseRecords.value = list
+                    }
+            } catch (e: Exception) {
+                android.util.Log.e("FirebaseSync", "Failed to fetch from Firestore: " + e.message)
+            }
         }
     }
 

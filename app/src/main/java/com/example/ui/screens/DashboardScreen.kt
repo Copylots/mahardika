@@ -37,10 +37,19 @@ fun DashboardScreen(
     viewModel: AttendanceViewModel,
     modifier: Modifier = Modifier
 ) {
-    val records by viewModel.allRecords.collectAsState()
-    val notifications by viewModel.allNotifications.collectAsState()
+    val localRecords by viewModel.allRecords.collectAsState()
+    val firebaseRecords by viewModel.firebaseRecords.collectAsState()
     val syncState by viewModel.syncState.collectAsState()
     val isAdminMode by viewModel.isAdminMode.collectAsState()
+    val notifications by viewModel.allNotifications.collectAsState()
+
+    val records = if (isAdminMode && firebaseRecords.isNotEmpty()) firebaseRecords else localRecords
+
+    LaunchedEffect(isAdminMode) {
+        if (isAdminMode) {
+            viewModel.fetchFirebaseRecords()
+        }
+    }
 
     var showPinDialog by remember { mutableStateOf(false) }
     var pinInput by remember { mutableStateOf("") }

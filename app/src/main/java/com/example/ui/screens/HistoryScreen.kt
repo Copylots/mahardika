@@ -30,9 +30,12 @@ fun HistoryScreen(
     viewModel: AttendanceViewModel,
     modifier: Modifier = Modifier
 ) {
-    val records by viewModel.allRecords.collectAsState()
+    val localRecords by viewModel.allRecords.collectAsState()
+    val firebaseRecords by viewModel.firebaseRecords.collectAsState()
     val exportStatus by viewModel.exportStatus.collectAsState()
     val isAdminMode by viewModel.isAdminMode.collectAsState()
+
+    val records = if (isAdminMode && firebaseRecords.isNotEmpty()) firebaseRecords else localRecords
 
     var searchQuery by remember { mutableStateOf("") }
     var selectedMonth by remember { mutableIntStateOf(Calendar.getInstance().get(Calendar.MONTH)) }
