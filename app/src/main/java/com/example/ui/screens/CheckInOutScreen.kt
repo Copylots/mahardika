@@ -581,9 +581,8 @@ fun ShiftSelectionCard(
             
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 val shifts = listOf(
-                    "Shift 1" to "07:00 - 15:00",
-                    "Shift 2" to "15:00 - 23:00",
-                    "Shift 3" to "23:00 - 07:00"
+                    "Shift 1" to "07:00 - 19:00",
+                    "Shift 2" to "19:00 - 07:00"
                 )
                 shifts.forEach { (shiftName, timeWindow) ->
                     val isSelected = selectedShift == shiftName
